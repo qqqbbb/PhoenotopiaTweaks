@@ -10,6 +10,12 @@ namespace PhoenotopiaTweaks
 {
     internal class Patches
     {
+        public static void Test()
+        {
+            if (Input.GetKeyDown(KeyCode.Z))
+                Util.Message("ZZZZZZZZZZZ");
+        }
+
         [HarmonyPatch(typeof(OpeningMenuLogic), "_GoToState")]
         class OpeningMenuLogic_GoToState_Patch
         {
@@ -29,9 +35,8 @@ namespace PhoenotopiaTweaks
         {
             public static bool Prefix(HeartHudLogic __instance)
             {
-                //if (Input.GetKey(KeyCode.Z))
-                //    Util.Message("ZZZZZZZZZZZ");
-                return Config.healthHeartAnimation.Value;
+                //Test();
+                return !Config.hudTweaks.Value;
             }
         }
 
@@ -283,13 +288,15 @@ namespace PhoenotopiaTweaks
                     atk_immune_tag = attack_stats.atk_immune_tag,
                     side_effects = attack_stats.side_effects
                 });
-                __result = new Hurtbox.AttackResult();
-                __result.atk_status = attack_stats.atk_class != Hitbox.ATK_CLASS.PROJECTILE ? Hitbox.ATK_STATUS.ATK_SUCCESS : Hitbox.ATK_STATUS.PROJ_CONTINUE;
-                __result.damaged_party = __instance;
-                __result.atk_effect1 = attack_stats.atk_effect1;
-                __result.atk_effect2 = attack_stats.atk_effect2;
-                __result.collided_layer_mask = GL.mask_HURTBOX;
-                __result.final_damage_transferred = finalDamage;
+                __result = new Hurtbox.AttackResult
+                {
+                    atk_status = attack_stats.atk_class != Hitbox.ATK_CLASS.PROJECTILE ? Hitbox.ATK_STATUS.ATK_SUCCESS : Hitbox.ATK_STATUS.PROJ_CONTINUE,
+                    damaged_party = __instance,
+                    atk_effect1 = attack_stats.atk_effect1,
+                    atk_effect2 = attack_stats.atk_effect2,
+                    collided_layer_mask = GL.mask_HURTBOX,
+                    final_damage_transferred = finalDamage
+                };
                 Hurtbox.IPEAS(collision_point, attackResult, __instance.hurtbox_material, attack_stats.hitbox_material, attack_stats.color);
                 return false;
             }
@@ -313,6 +320,94 @@ namespace PhoenotopiaTweaks
             }
         }
 
+        static bool camIconDisabled = false;
+
+        [HarmonyPatch(typeof(CamHudLogic), "FixedUpdate")]
+        class CamHudLogic_FixedUpdate_Patch
+        {
+            public static bool Prefix(CamHudLogic __instance)
+            {
+                if (Config.hudTweaks.Value)
+                {
+                    if (!camIconDisabled)
+                    {
+                        Transform icon = __instance.transform.Find("Graphic");
+                        if (icon != null)
+                        {
+                            icon.gameObject.SetActive(false);
+                            camIconDisabled = true;
+                        }
+                    }
+                    return false;
+                }
+                if (camIconDisabled)
+                {
+                    Transform icon = __instance.transform.Find("Graphic");
+                    if (icon != null)
+                    {
+                        icon.gameObject.SetActive(true);
+                        camIconDisabled = false;
+                    }
+                }
+                return true;
+            }
+        }
+
+        static bool staminaBGdisabled = false;
+
+        [HarmonyPatch(typeof(StaminaHudLogic), "FixedUpdate")]
+        class StaminaHudLogic_FixedUpdate_Patch
+        {
+            public static void Postfix(StaminaHudLogic __instance)
+            {
+                if (Config.hudTweaks.Value)
+                {
+                    if (!staminaBGdisabled)
+                    {
+                        Transform t = __instance.transform.Find("StaminaBG");
+                        if (t != null)
+                        {
+                            t.gameObject.SetActive(false);
+                            staminaBGdisabled = true;
+                        }
+                        t = __instance.transform.Find("StaminaBarBlack");
+                        if (t != null)
+                        {
+                            t.gameObject.SetActive(false);
+                            staminaBGdisabled = true;
+                        }
+                        t = __instance.transform.Find("StaminaCutoffLine");
+                        if (t != null)
+                        {
+                            t.gameObject.SetActive(false);
+                            staminaBGdisabled = true;
+                        }
+                    }
+                    return;
+                }
+                if (staminaBGdisabled)
+                {
+                    Transform t = __instance.transform.Find("StaminaBG");
+                    if (t != null)
+                    {
+                        t.gameObject.SetActive(true);
+                        staminaBGdisabled = false;
+                    }
+                    t = __instance.transform.Find("StaminaBarBlack");
+                    if (t != null)
+                    {
+                        t.gameObject.SetActive(true);
+                        staminaBGdisabled = false;
+                    }
+                    t = __instance.transform.Find("StaminaCutoffLine");
+                    if (t != null)
+                    {
+                        t.gameObject.SetActive(true);
+                        staminaBGdisabled = false;
+                    }
+                }
+            }
+        }
 
 
     }

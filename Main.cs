@@ -9,13 +9,14 @@ using System.Text;
 
 namespace PhoenotopiaTweaks
 {
+    //TriggerRegen
+
     [BepInPlugin(PLUGIN_GUID, PLUGIN_NAME, PLUGIN_VERSION)]
     public class Main : BaseUnityPlugin
     {
-        //TriggerRegen
         public const string PLUGIN_GUID = "qqqbbb.Phoenotopia.tweaks";
         public const string PLUGIN_NAME = "Phoenotopia Tweaks";
-        public const string PLUGIN_VERSION = "1.0.0";
+        public const string PLUGIN_VERSION = "1.1.0";
 
         public static ConfigFile config;
         public static ManualLogSource logger;
